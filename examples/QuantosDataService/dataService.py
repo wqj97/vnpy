@@ -83,47 +83,51 @@ def generateVtBar(row):
 # ----------------------------------------------------------------------
 def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
     """下载某一合约的分钟线数据"""
-    start = time()
-    code, exchange = vtSymbol.split('.')
-    print('正在下载合约: {}'.format(code))
+    try:
+        start = time()
+        code, exchange = vtSymbol.split('.')
+        print('正在下载合约: {}'.format(code))
 
-    if exchange in ['SSE', 'SZSE']:
-        cl = db[vtSymbol]
-    else:
-        cl = db[code]
-    cl.ensure_index([('datetime', ASCENDING)], unique=True)  # 添加索引
+        if exchange in ['SSE', 'SZSE']:
+            cl = db[vtSymbol]
+        else:
+            cl = db[code]
+        cl.ensure_index([('datetime', ASCENDING)], unique=True)  # 添加索引
 
-    dt = datetime.strptime(startDate, '%Y%m%d')
+        dt = datetime.strptime(startDate, '%Y%m%d')
 
-    if endDate:
-        end = datetime.strptime(endDate, '%Y%m%d')
-    else:
-        end = datetime.now()
-    delta = timedelta(1)
-    symbol = '.'.join([code, exchangeMap[exchange]])
-    latest_day = cl.find().sort('datetime', -1).limit(1)
+        if endDate:
+            end = datetime.strptime(endDate, '%Y%m%d')
+        else:
+            end = datetime.now()
+        delta = timedelta(1)
+        symbol = '.'.join([code, exchangeMap[exchange]])
+        latest_day = cl.find().sort('datetime', -1).limit(1)
 
-    if latest_day.count() != 0:
-        latest_day = latest_day[0]['datetime']
-        latest_day = datetime(latest_day.year, latest_day.month, latest_day.day)
-        print("上次合约: {} 更新到了: {}, 正在同步新的内容".format(code, latest_day))
-        dt = latest_day
+        if latest_day.count() != 0:
+            latest_day = latest_day[0]['datetime']
+            latest_day = datetime(latest_day.year, latest_day.month, latest_day.day)
+            print("上次合约: {} 更新到了: {}, 正在同步新的内容".format(code, latest_day))
+            dt = latest_day
 
-    while dt <= end:
-        d = int(dt.strftime('%Y%m%d'))
-        df, msg = api.bar(symbol, freq='1M', trade_date=d)
-        dt += delta
+        while dt <= end:
+            d = int(dt.strftime('%Y%m%d'))
+            df, msg = api.bar(symbol, freq='1M', trade_date=d)
+            dt += delta
 
-        if df is None:
-            continue
+            if df is None:
+                continue
 
-        for ix, row in df.iterrows():
-            bar = generateVtBar(row)
-            d = bar.__dict__
-            flt = {'datetime': bar.datetime}
-            cl.replace_one(flt, d, True)
-    e = time()
-    cost = (e - start) * 1000
+            for ix, row in df.iterrows():
+                bar = generateVtBar(row)
+                d = bar.__dict__
+                flt = {'datetime': bar.datetime}
+                cl.replace_one(flt, d, True)
+        e = time()
+        cost = (e - start) * 1000
+    except Exception, e:
+        import traceback
+        traceback.print_exc(e)
 
     print u'合约%s数据下载完成%s - %s，耗时%s毫秒' % (vtSymbol, startDate, end.strftime('%Y%m%d'), cost)
 
