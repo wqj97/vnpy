@@ -86,7 +86,6 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
     try:
         start = time()
         code, exchange = vtSymbol.split('.')
-        print('正在下载合约: {}'.format(code))
 
         if exchange in ['SSE', 'SZSE']:
             cl = db[vtSymbol]
@@ -139,15 +138,21 @@ def downloadAllMinuteBar(api):
     print u'开始下载合约分钟线数据'
     print '-' * 50
 
-    poll = Pool(10)
+    poll = Pool(16)
+    today = datetime.today()
     # 添加下载任务
     for symbol in SYMBOLS:
-        startDt = symbol.split('.')[0][-4:]
-        startDt = datetime(2000 + int(startDt[0:2]) - 1, int(startDt[2:5]), 1)
-        startDate = startDt.strftime('%Y%m%d')
-        poll.apply_async(downMinuteBarBySymbol, (api, str(symbol), startDate))
-        print('')
-        sleep(0.2)
+        for month in symbol['key_month']:
+            if today.month >= month:
+                search_year = today.year + 1
+            else:
+                search_year = today.year
+            for year in xrange(2014, search_year + 1):
+                startDate = datetime(year, month, 01).strftime('%Y%m%d')
+                code = "{}{}{}.{}".format(symbol['type'],year % 2000, str(month).zfill(2), symbol['exchange'])
+                poll.apply_async(downMinuteBarBySymbol, (api, code, startDate))
+                sleep(0.1)
+
     poll.close()
     poll.join()
     print '-' * 50

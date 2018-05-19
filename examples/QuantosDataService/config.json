@@ -1,21 +1,36 @@
 {
-	"MONGO_HOST": "localhost",
-	"MONGO_PORT": 27017,
-	"DATA_SERVER": "tcp://data.tushare.org:8910",
-	"USERNAME": "13347320707",
-	"TOKEN": "eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVfdGltZSI6IjE1MjU5NTQ2MjU0MzQiLCJpc3MiOiJhdXRoMCIsImlkIjoiMTMzNDczMjA3MDcifQ.o_5YCXbExNHxnf711FGu99XHl21KBz1mFKiYNjQvWtM",
-	"SYMBOLS": [
-		"cu1805.SHFE",
-		"cu1801.SHFE",
-		"cu1810.SHFE",
-		"hc1801.SHFE",
-		"hc1805.SHFE",
-		"hc1810.SHFE",
-		"rb1801.SHFE",
-		"rb1805.SHFE",
-		"rb1810.SHFE",
-		"j1801.DCE",
-		"j1805.DCE",
-		"j1809.DCE"
-	]
+  "MONGO_HOST": "localhost",
+  "MONGO_PORT": 27017,
+  "DATA_SERVER": "tcp://data.tushare.org:8910",
+  "USERNAME": "13347320707",
+  "TOKEN": "eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVfdGltZSI6IjE1MjU5NTQ2MjU0MzQiLCJpc3MiOiJhdXRoMCIsImlkIjoiMTMzNDczMjA3MDcifQ.o_5YCXbExNHxnf711FGu99XHl21KBz1mFKiYNjQvWtM",
+  "SYMBOLS": [
+    {
+      "type": "j",
+      "key_month": [
+        1,
+        5,
+        9
+      ],
+      "exchange": "DCE"
+    },
+    {
+      "type": "rb",
+      "key_month": [
+        1,
+        5,
+        10
+      ],
+      "exchange": "SHFE"
+    },
+    {
+      "type": "hc",
+      "key_month": [
+        1,
+        5,
+        10
+      ],
+      "exchange": "SHFE"
+    }
+  ]
 }
