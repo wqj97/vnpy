@@ -98,7 +98,7 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
         if endDate:
             end = datetime.strptime(endDate, '%Y%m%d')
         else:
-            end = datetime.now()
+            end = dt + timedelta(400)
         delta = timedelta(1)
         symbol = '.'.join([code, exchangeMap[exchange]])
         latest_day = cl.find().sort('datetime', -1).limit(1)
@@ -112,7 +112,13 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
         while dt <= end:
             d = int(dt.strftime('%Y%m%d'))
             df, msg = api.bar(symbol, freq='1M', trade_date=d)
-            dt += delta
+
+            if msg == '0,':
+                dt += delta
+            else:
+                print("触及调用上线, 错误信息: {}".format(msg))
+                sleep(10)
+                continue
 
             if df is None:
                 continue
@@ -122,13 +128,12 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
                 d = bar.__dict__
                 flt = {'datetime': bar.datetime}
                 cl.replace_one(flt, d, True)
-        e = time()
-        cost = (e - start) * 1000
     except Exception, e:
         import traceback
         traceback.print_exc(e)
-
-    print u'合约%s数据下载完成%s - %s，耗时%s毫秒' % (vtSymbol, startDate, end.strftime('%Y%m%d'), cost)
+    finally:
+        print u'合约%s数据下载完成%s - %s, 共%s天' % (
+            vtSymbol, latest_day.strftime('%Y%m%d'), end.strftime('%Y%m%d'), (end - latest_day).days)
 
 
 # ----------------------------------------------------------------------
@@ -138,7 +143,7 @@ def downloadAllMinuteBar(api):
     print u'开始下载合约分钟线数据'
     print '-' * 50
 
-    poll = Pool(16)
+    poll = Pool(32)
     today = datetime.today()
     # 添加下载任务
     for symbol in SYMBOLS:
@@ -148,10 +153,11 @@ def downloadAllMinuteBar(api):
             else:
                 search_year = today.year
             for year in xrange(2014, search_year + 1):
-                startDate = datetime(year, month, 01).strftime('%Y%m%d')
-                code = "{}{}{}.{}".format(symbol['type'],year % 2000, str(month).zfill(2), symbol['exchange'])
+                startDate = datetime(year - 1, month, 01).strftime('%Y%m%d')
+                code = "{}{}{}.{}".format(symbol['type'], year % 2000, str(month).zfill(2), symbol['exchange'])
+                print("{}合约: {} 下载线程启动{}".format('-' * 10, code, '-' * 10))
                 poll.apply_async(downMinuteBarBySymbol, (api, code, startDate))
-                sleep(0.1)
+                sleep(1)
 
     poll.close()
     poll.join()
