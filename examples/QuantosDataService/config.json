@@ -15,6 +15,33 @@
       "exchange": "DCE"
     },
     {
+      "type": "i",
+      "key_month": [
+        1,
+        5,
+        9
+      ],
+      "exchange": "DCE"
+    },
+    {
+      "type": "jm",
+      "key_month": [
+        1,
+        5,
+        9
+      ],
+      "exchange": "DCE"
+    },
+    {
+      "type": "FG",
+      "key_month": [
+        1,
+        5,
+        9
+      ],
+      "exchange": "CZCE"
+    },
+    {
       "type": "rb",
       "key_month": [
         1,
@@ -32,5 +59,6 @@
       ],
       "exchange": "SHFE"
     }
+
   ]
 }

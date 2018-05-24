@@ -4,7 +4,7 @@ import sys
 import json
 from datetime import datetime, timedelta
 from time import time, sleep
-
+import random
 from pymongo import MongoClient, ASCENDING
 
 from vnpy.trader.vtObject import VtBarData
@@ -84,7 +84,6 @@ def generateVtBar(row):
 def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
     """下载某一合约的分钟线数据"""
     try:
-        start = time()
         code, exchange = vtSymbol.split('.')
 
         if exchange in ['SSE', 'SZSE']:
@@ -116,8 +115,9 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
             if msg == '0,':
                 dt += delta
             else:
-                print("触及调用上线, 错误信息: {}".format(msg))
-                sleep(10)
+                print("合约下载线程: {} -- 出现错误, 错误信息: {}".format(code, msg))
+                sleep(random.randrange(25, 45))
+                print("合约下载线程: {} -- 恢复工作".format(code))
                 continue
 
             if df is None:
@@ -132,6 +132,7 @@ def downMinuteBarBySymbol(api, vtSymbol, startDate, endDate=''):
         import traceback
         traceback.print_exc(e)
     finally:
+        del cl
         print u'合约%s数据下载完成%s - %s, 共%s天' % (
             vtSymbol, latest_day.strftime('%Y%m%d'), end.strftime('%Y%m%d'), (end - latest_day).days)
 
@@ -143,10 +144,13 @@ def downloadAllMinuteBar(api):
     print u'开始下载合约分钟线数据'
     print '-' * 50
 
-    poll = Pool(32)
+    poll = Pool(24)
     today = datetime.today()
     # 添加下载任务
+    random.shuffle(SYMBOLS)
+
     for symbol in SYMBOLS:
+        random.shuffle(symbol['key_month'])
         for month in symbol['key_month']:
             if today.month >= month:
                 search_year = today.year + 1
