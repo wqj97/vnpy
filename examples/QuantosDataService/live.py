@@ -8,11 +8,11 @@ from flask import Flask, request, abort
 from gevent.pywsgi import WSGIServer
 from geventwebsocket import WebSocketError
 from geventwebsocket.handler import WebSocketHandler
-
+import Queue
 import dataService
 from vnpy.trader.gateway.tkproGateway.DataApi import DataApi
 
-pool = mp.Pool(16)
+pool = mp.Pool(8)
 
 config = open('config.json')
 setting = json.load(config)
@@ -64,17 +64,17 @@ def on_quote(k, v):
     message = json.dumps(d)
 
     for clent in client_list:
-        pool.apply_async(send_message, (clent, message))
+        send_message(clent, message)
 
 
-df, msg = api.bar("hc1810.SHF, rb1810.SHF", freq='1M', trade_date=20180523)
+df, msg = api.bar("rb1901.SHF, hc1901.SHF", freq='1M', trade_date=20180523)
 
 
 def send_mook_data():
     count_df = len(df)
     while True:
         on_quote(None, df.iloc[random.randrange(0, count_df)])
-        time.sleep(random.randrange(0.1, 1, 0.1))
+        time.sleep(random.randint(1, 10) / 10)
 
 
 if __name__ == '__main__':
