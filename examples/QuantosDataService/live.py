@@ -12,6 +12,8 @@ from geventwebsocket.handler import WebSocketHandler
 import dataService
 from vnpy.trader.gateway.tkproGateway.DataApi import DataApi
 
+pool = mp.Pool(16)
+
 config = open('config.json')
 setting = json.load(config)
 config.close()
@@ -46,6 +48,15 @@ def echo():
                     ws.send(message)
 
 
+def send_message(clent, message):
+    try:
+        clent.send(message)
+    except WebSocketError:
+        client_list.remove(clent)
+    except Exception, e:
+        traceback.print_exc(e)
+
+
 def on_quote(k, v):
     bar = dataService.generateVtBar(v)
     d = bar.__dict__
@@ -53,32 +64,23 @@ def on_quote(k, v):
     message = json.dumps(d)
 
     for clent in client_list:
-        try:
-            clent.send(message)
-        except WebSocketError:
-            client_list.remove(clent)
-        except Exception, e:
-            traceback.print_exc(e)
+        pool.apply_async(send_message, (clent, message))
 
 
 df, msg = api.bar("hc1810.SHF, rb1810.SHF", freq='1M', trade_date=20180523)
 
 
 def send_mook_data():
-    max_line = len(df)
+    count_df = len(df)
     while True:
-        on_quote(1, df.iloc[random.randrange(0, max_line)])
-        time.sleep(1)
+        on_quote(None, df.iloc[random.randrange(0, count_df)])
+        time.sleep(random.randrange(0.1, 1, 0.1))
 
 
 if __name__ == '__main__':
-    # pool = mp.Pool(2)
-
     http_server = WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
-    # pool.apply_async(send_mook_data)
-    code, msg = api.subscribe('hc1810.SHF, rb1810.SHF', func=on_quote)
+    pool.apply_async(send_mook_data)
+    # code, msg = api.subscribe('hc1810.SHF, rb1810.SHF', func=on_quote)
     http_server.serve_forever()
-    # pool.close()
-    # pool.join()
 
     # code, msg = api.subscribe('hc1810.SHF, rb1810.SHF', func=on_quote)
