@@ -6,59 +6,46 @@
   "TOKEN": "eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVfdGltZSI6IjE1MjU5NTQ2MjU0MzQiLCJpc3MiOiJhdXRoMCIsImlkIjoiMTMzNDczMjA3MDcifQ.o_5YCXbExNHxnf711FGu99XHl21KBz1mFKiYNjQvWtM",
   "SYMBOLS": [
     {
-      "type": "j",
-      "key_month": [
-        1,
-        5,
-        9
-      ],
-      "exchange": "DCE"
-    },
-    {
-      "type": "i",
-      "key_month": [
-        1,
-        5,
-        9
-      ],
-      "exchange": "DCE"
-    },
-    {
-      "type": "jm",
-      "key_month": [
-        1,
-        5,
-        9
+      "type": [
+        "j",
+        "i",
+        "jm"
       ],
       "exchange": "DCE"
     },
     {
       "type": "FG",
-      "key_month": [
-        1,
-        5,
-        9
-      ],
-      "exchange": "CZCE"
+      "exchange": "CZC"
     },
     {
-      "type": "rb",
+      "type": [
+        "rb",
+        "hc"
+      ],
       "key_month": [
         1,
         5,
         10
       ],
-      "exchange": "SHFE"
+      "exchange": "SHF"
     },
     {
-      "type": "hc",
-      "key_month": [
-        1,
-        5,
-        10
+      "type": [
+        "cu",
+        "al",
+        "zn",
+        "ru",
+        "cu",
+        "fu",
+        "au",
+        "ag",
+        "wr",
+        "pb",
+        "bu",
+        "SN",
+        "NI"
       ],
-      "exchange": "SHFE"
+      "exchange": "SHF"
     }
-
   ]
 }

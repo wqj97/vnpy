@@ -67,7 +67,7 @@ def on_quote(k, v):
         send_message(clent, message)
 
 
-df, msg = api.bar("rb1901.SHF, hc1901.SHF", freq='1M', trade_date=20180523)
+df, msg = api.bar("rb1901.SHF, hc1901.SHF", freq='1M', trade_date=20180528)
 
 
 def send_mook_data():
