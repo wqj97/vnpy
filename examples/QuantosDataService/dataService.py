@@ -167,5 +167,5 @@ def downloadAllMinuteBar(api):
     poll.close()
     poll.join()
     print '-' * 50
-    print u'合约分钟线数据下载完成'
+    print ('合约分钟线数据下载完成')
     print '-' * 50

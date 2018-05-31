@@ -12,6 +12,6 @@ if __name__ == '__main__':
     info, msg = api.login(USERNAME, TOKEN)
 
     if not info:
-        print u'数据服务器登录失败，原因：%s' % msg
+        print ('数据服务器登录失败，原因：%s', msg)
     # 下载数据
     downloadAllMinuteBar(api)
