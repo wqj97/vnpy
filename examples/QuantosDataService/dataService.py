@@ -40,8 +40,9 @@ DATA_SERVER = setting['DATA_SERVER']
 mc = MongoClient(MONGO_HOST, MONGO_PORT)  # Mongo连接
 db = mc[MINUTE_DB_NAME]  # 数据库
 collections = db.collection_names()
-cl = db['minute_data']
-cl.ensure_index([('datetime', ASCENDING)], unique=True)  # 添加索引
+cl = db['day_data']
+# cl.ensure_index([('_id', ASCENDING)], unique=True)  # 添加索引
+
 
 # ----------------------------------------------------------------------
 def generateVtBar(row):
@@ -59,26 +60,9 @@ def generateVtBar(row):
     bar.close = row['close']
     bar.volume = row['volume']
 
-    bar.date = str(row['date'])
-    bar.time = str(row['time']).rjust(6, '0')
+    bar.date = str(row['trade_date'])
 
-    # 将bar的时间改成提前一分钟
-    hour = bar.time[0:2]
-    minute = bar.time[2:4]
-    sec = bar.time[4:6]
-    if minute == "00":
-        minute = "59"
-
-        h = int(hour)
-        if h == 0:
-            h = 24
-
-        hour = str(h - 1).rjust(2, '0')
-    else:
-        minute = str(int(minute) - 1).rjust(2, '0')
-    bar.time = hour + minute + sec
-
-    bar.datetime = datetime.strptime(' '.join([bar.date, bar.time]), '%Y%m%d %H%M%S')
+    bar.datetime = datetime.strptime(' '.join([bar.date]), '%Y%m%d')
 
     return bar
 
@@ -122,8 +106,35 @@ def down_minute_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
             for ix, row in df.iterrows():
                 bar = generateVtBar(row)
                 d = bar.__dict__
-                flt = {'datetime': bar.datetime}
+                flt = {'datetime': bar.datetime, 'symbol': bar.symbol}
                 cl.replace_one(flt, d, True)
+
+    except Exception, e:
+        import traceback
+        traceback.print_exc(e)
+    finally:
+        print '合约下载完成'
+
+
+def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
+    """下载某一合约的分钟线数据"""
+    print('线程启动')
+    try:
+        # dt = datetime.strptime(start_date, '%Y%m%d')
+        # dt = datetime(2014, 01, 01)
+        end = datetime.today().strftime('%Y%M%d')
+        df, msg = api.daily(vt_symbol, start_date=20140101, end_date=int(end))
+
+        if msg != '0,':
+            print("合约下载线程出现错误, 错误信息: {}".format(msg))
+            sleep(random.randrange(25, 45))
+            print("合约下载线程恢复工作")
+
+        for ix, row in df.iterrows():
+            bar = generateVtBar(row)
+            d = bar.__dict__
+            flt = {'datetime': bar.datetime, 'symbol': bar.symbol}
+            cl.replace_one(flt, d, True)
 
     except Exception, e:
         import traceback
@@ -163,7 +174,7 @@ def downloadAllMinuteBar(api):
     np.random.shuffle(query_code)
     query_code = np.array_split(query_code, thread)
     for code in query_code:
-        poll.apply_async(down_minute_bar_by_symbol, (api, ','.join(code), startDate))
+        poll.apply_async(down_daily_bar_by_symbol, (api, ','.join(code), startDate))
     poll.close()
     poll.join()
     print '-' * 50
