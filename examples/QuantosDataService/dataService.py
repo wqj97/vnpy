@@ -146,12 +146,11 @@ def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
 
 
 # ----------------------------------------------------------------------
-def downloadAllMinuteBar(api):
+def downloadAllMinuteBar(api, thread = 4):
     """下载所有配置中的合约的分钟线数据"""
     print '-' * 50
     print u'开始下载合约分钟线数据'
     print '-' * 50
-    thread = 4
     poll = Pool(thread)
     today = datetime.today()
     # 添加下载任务
