@@ -7,6 +7,19 @@
   "SYMBOLS": [
     {
       "type": [
+        "a",
+        "b",
+        "m",
+        "c",
+        "y",
+        "p",
+        "l",
+        "v",
+        "jd",
+        "fb",
+        "bb",
+        "pp",
+        "cs",
         "j",
         "i",
         "jm"
@@ -14,7 +27,25 @@
       "exchange": "DCE"
     },
     {
-      "type": "FG",
+      "type": [
+        "PM",
+        "FG",
+        "WH",
+        "CF",
+        "SR",
+        "OI",
+        "TA",
+        "RI",
+        "LR",
+        "MA",
+        "RS",
+        "RM",
+        "TC",
+        "ZC",
+        "JR",
+        "SF",
+        "SM"
+      ],
       "exchange": "CZC"
     },
     {
@@ -46,6 +77,16 @@
         "NI"
       ],
       "exchange": "SHF"
+    },
+    {
+      "type": [
+        "IF",
+        "IH",
+        "IC",
+        "TF",
+        "T"
+      ],
+      "exchange": "CFE"
     }
   ]
 }

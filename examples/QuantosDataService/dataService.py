@@ -41,6 +41,8 @@ mc = MongoClient(MONGO_HOST, MONGO_PORT)  # Mongo连接
 db = mc[MINUTE_DB_NAME]  # 数据库
 collections = db.collection_names()
 cl = db['day_data']
+
+
 # cl.ensure_index([('_id', ASCENDING)], unique=True)  # 添加索引
 
 
