@@ -122,8 +122,6 @@ def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
     """下载某一合约的分钟线数据"""
     print('线程启动')
     try:
-        # dt = datetime.strptime(start_date, '%Y%m%d')
-        # dt = datetime(2014, 01, 01)
         end = datetime.today().strftime('%Y%M%d')
         df, msg = api.daily(vt_symbol, start_date=20140101, end_date=int(end))
 
@@ -167,7 +165,10 @@ def downloadAllMinuteBar(api, thread = 4):
                 else:
                     search_year = today.year
                 for year in xrange(2014, search_year + 1):
-                    code = "{}{}{}.{}".format(type, year % 2000, str(month).zfill(2), symbol['exchange'])
+                    if symbol['exchange'] != 'CZC':
+                        code = "{}{}{}.{}".format(type, year % 2000, str(month).zfill(2), symbol['exchange'])
+                    else:
+                        code = "{}{}{}.{}".format(type, year % 2010, str(month).zfill(2), symbol['exchange'])
                     query_code.append(code)
     # 分4个线程查询数据
     startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
