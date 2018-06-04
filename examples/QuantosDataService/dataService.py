@@ -144,7 +144,7 @@ def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
 
 
 # ----------------------------------------------------------------------
-def downloadAllMinuteBar(api, thread = 4):
+def downloadAllMinuteBar(api, thread=4, update=True):
     """下载所有配置中的合约的分钟线数据"""
     print '-' * 50
     print u'开始下载合约分钟线数据'
@@ -154,6 +154,7 @@ def downloadAllMinuteBar(api, thread = 4):
     # 添加下载任务
     random.shuffle(SYMBOLS)
     query_code = []
+    symbols = set()
     for symbol in SYMBOLS:
         if not symbol.has_key('key_month'):
             symbol['key_month'] = [1, 5, 9]
@@ -169,9 +170,27 @@ def downloadAllMinuteBar(api, thread = 4):
                         code = "{}{}{}.{}".format(type, year % 2000, str(month).zfill(2), symbol['exchange'])
                     else:
                         code = "{}{}{}.{}".format(type, year % 2010, str(month).zfill(2), symbol['exchange'])
+                    symbols.add("{}{}{}".format(type, year % 2000, str(month).zfill(2)))
                     query_code.append(code)
     # 分4个线程查询数据
-    startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
+
+    if update:
+        codes = list(symbols)
+        startDate = None
+        for code in codes:
+            query_date = cl.find({
+                "symbol": code
+            }).sort("datetime", ASCENDING).limit(1)
+            if query_date.count():
+                query_date = query_date[0]['datetime']
+            else:
+                continue
+            if startDate == None or startDate < query_date:
+                startDate = query_date
+        print("从{}开始更新".format(startDate))
+    else:
+        startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
+
     query_code = np.array(query_code)
     np.random.shuffle(query_code)
     query_code = np.array_split(query_code, thread)
