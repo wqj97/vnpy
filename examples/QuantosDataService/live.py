@@ -1,10 +1,9 @@
 # coding=utf-8
 import json
-import multiprocessing.dummy as mp
-import random
-import time
-import traceback
 import re
+import traceback
+
+from OpenSSL import SSL
 from flask import Flask, request, abort
 from gevent.pywsgi import WSGIServer
 from geventwebsocket import WebSocketError
@@ -112,7 +111,8 @@ def symbol_fix(symbol):
 
 
 if __name__ == '__main__':
-    http_server = WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
+    http_server = WSGIServer(('0.0.0.0', 8888), app, handler_class=WebSocketHandler, keyfile='ssl/data.lyquant.com.key',
+                             certfile='ssl/data.lyquant.com.cer')
     # pool.apply_async(send_mook_data)
     # api.subscribe(','.join(code_data.keys()), func=on_quote)
     http_server.serve_forever()
