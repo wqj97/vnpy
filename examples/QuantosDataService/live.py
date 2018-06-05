@@ -43,6 +43,7 @@ def echo():
         for symbol in code:
             if symbol not in code_data:
                 code_data[symbol] = 1
+                print
                 api.subscribe(symbol_fix(symbol), func=on_quote)
             else:
                 code_data[symbol] += 1
@@ -56,7 +57,8 @@ def echo():
                     message = ws.receive()
                     try:
                         ws.send(message)
-                    except WebSocketError:
+                    except WebSocketError, e:
+                        traceback.print_exc(e)
                         for key, (client, code) in enumerate(client_list):
                             if client is ws:
                                 del client_list[key]
@@ -71,7 +73,6 @@ def echo():
 
 
 def on_quote(k, v):
-    print(v)
     bar = dataService.generateVtBar(v)
     d = bar.__dict__
     d['datetime'] = bar.datetime.strftime("%Y-%m-%d-%H")
@@ -93,9 +94,7 @@ def symbol_fix(symbol):
     month = number[-2:]
     for exchange in setting['SYMBOLS']:
         for type in exchange['type']:
-            print(type)
             if type == code_type:
-                print(type)
                 if exchange['exchange'] == 'CZC':
                     return "{}{}{}.CZC".format(code_type, int(year) % 10, month)
                 else:
@@ -115,7 +114,7 @@ def symbol_fix(symbol):
 if __name__ == '__main__':
     http_server = WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
     # pool.apply_async(send_mook_data)
-    api.subscribe(','.join(code_data.keys()), func=on_quote)
+    # api.subscribe(','.join(code_data.keys()), func=on_quote)
     http_server.serve_forever()
 
     # code, msg = api.subscribe('hc1810.SHF, rb1810.SHF', func=on_quote)
