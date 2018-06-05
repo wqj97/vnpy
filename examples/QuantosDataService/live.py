@@ -4,7 +4,7 @@ import multiprocessing.dummy as mp
 import random
 import time
 import traceback
-
+import re
 from flask import Flask, request, abort
 from gevent.pywsgi import WSGIServer
 from geventwebsocket import WebSocketError
@@ -43,7 +43,7 @@ def echo():
         for symbol in code:
             if symbol not in code_data:
                 code_data[symbol] = 1
-                api.subscribe(symbol, on_quote)
+                api.subscribe(symbol_fix(symbol), func=on_quote)
             else:
                 code_data[symbol] += 1
         client_list.append((ws, code))
@@ -71,6 +71,7 @@ def echo():
 
 
 def on_quote(k, v):
+    print(v)
     bar = dataService.generateVtBar(v)
     d = bar.__dict__
     d['datetime'] = bar.datetime.strftime("%Y-%m-%d-%H")
@@ -79,6 +80,26 @@ def on_quote(k, v):
     for clent, code in client_list:
         if d['symbol'] in code:
             clent.send(message)
+
+
+def symbol_fix(symbol):
+    """
+    代码加上交易所
+    :param str symbol:
+    """
+    code_type = re.match('[A-Za-z]+', symbol).group()
+    number = re.findall('\d+', symbol)[0]
+    year = number[0:2]
+    month = number[-2:]
+    for exchange in setting['SYMBOLS']:
+        for type in exchange['type']:
+            print(type)
+            if type == code_type:
+                print(type)
+                if exchange['exchange'] == 'CZC':
+                    return "{}{}{}.CZC".format(code_type, int(year) % 10, month)
+                else:
+                    return "{}{}.{}".format(code_type, number, exchange['exchange'])
 
 
 # df, msg = api.bar("rb1901.SHF, hc1901.SHF", freq='1M', trade_date=20180528)
@@ -94,7 +115,7 @@ def on_quote(k, v):
 if __name__ == '__main__':
     http_server = WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
     # pool.apply_async(send_mook_data)
-    code, msg = api.subscribe(','.join(code_data.keys()), func=on_quote)
+    api.subscribe(','.join(code_data.keys()), func=on_quote)
     http_server.serve_forever()
 
     # code, msg = api.subscribe('hc1810.SHF, rb1810.SHF', func=on_quote)

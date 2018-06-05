@@ -187,6 +187,7 @@ def downloadAllMinuteBar(api, thread=4, update=True):
                 continue
             if startDate == None or startDate < query_date:
                 startDate = query_date
+        startDate = startDate.strftime('%Y%m%d')
         print("从{}开始更新".format(startDate))
     else:
         startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
