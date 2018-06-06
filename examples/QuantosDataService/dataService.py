@@ -188,10 +188,10 @@ def downloadAllMinuteBar(api, thread=4, update=True):
             if startDate == None or startDate < query_date:
                 startDate = query_date
         startDate = startDate.strftime('%Y%m%d')
-        print("从{}开始更新".format(startDate))
     else:
         startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
 
+    print("从{}开始更新".format(startDate))
     query_code = np.array(query_code)
     np.random.shuffle(query_code)
     query_code = np.array_split(query_code, thread)
