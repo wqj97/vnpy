@@ -123,7 +123,7 @@ def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
     print('线程启动')
     try:
         end = datetime.today().strftime('%Y%M%d')
-        df, msg = api.daily(vt_symbol, start_date=20140101, end_date=int(end))
+        df, msg = api.daily(vt_symbol, start_date=int(start_date), end_date=int(end))
 
         if msg != '0,':
             print("合约下载线程出现错误, 错误信息: {}".format(msg))
@@ -144,7 +144,7 @@ def down_daily_bar_by_symbol(api, vt_symbol, start_date, end_date=''):
 
 
 # ----------------------------------------------------------------------
-def downloadAllMinuteBar(api, thread=4, update=True):
+def downloadAllMinuteBar(api, thread=4, start=None, update=True):
     """下载所有配置中的合约的分钟线数据"""
     print '-' * 50
     print u'开始下载合约分钟线数据'
@@ -174,22 +174,25 @@ def downloadAllMinuteBar(api, thread=4, update=True):
                     query_code.append(code)
     # 分4个线程查询数据
 
-    if update:
-        codes = list(symbols)
-        startDate = None
-        for code in codes:
-            query_date = cl.find({
-                "symbol": code
-            }).sort("datetime", ASCENDING).limit(1)
-            if query_date.count():
-                query_date = query_date[0]['datetime']
-            else:
-                continue
-            if startDate == None or startDate < query_date:
-                startDate = query_date
-        startDate = startDate.strftime('%Y%m%d')
+    if start:
+        startDate = start
     else:
-        startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
+        if update:
+            codes = list(symbols)
+            startDate = None
+            for code in codes:
+                query_date = cl.find({
+                    "symbol": code
+                }).sort("datetime", ASCENDING).limit(1)
+                if query_date.count():
+                    query_date = query_date[0]['datetime']
+                else:
+                    continue
+                if startDate == None or startDate < query_date:
+                    startDate = query_date
+            startDate = startDate.strftime('%Y%m%d')
+        else:
+            startDate = datetime(2014, 01, 01).strftime('%Y%m%d')
 
     print("从{}开始更新".format(startDate))
     query_code = np.array(query_code)
